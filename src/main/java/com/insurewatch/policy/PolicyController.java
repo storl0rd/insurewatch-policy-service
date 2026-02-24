@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.data.domain.PageRequest;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -171,7 +172,7 @@ public class PolicyController {
     }
 
     private void seedSampleData() {
-        if (policyRepository.count() == 0) {
+        if (!policyRepository.findAll(PageRequest.of(0, 1)).hasContent()) {
             log.info("Seeding sample policy data...");
             String[] customers = {"CUST001", "CUST002", "CUST003", "CUST004", "CUST005"};
             String[] types = {"health", "auto", "property", "life"};
