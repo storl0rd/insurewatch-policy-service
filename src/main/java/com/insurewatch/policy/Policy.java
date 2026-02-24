@@ -41,6 +41,7 @@ public class Policy {
 
     public Policy() {}
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String c) { this.customerId = c; }
     public String getPolicyNumber() { return policyNumber; }

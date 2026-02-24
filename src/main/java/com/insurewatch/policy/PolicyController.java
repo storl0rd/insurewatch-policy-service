@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.data.domain.PageRequest;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,7 +47,11 @@ public class PolicyController {
         policyErrors = meter.counterBuilder("policy.errors.total")
             .setDescription("Total policy errors").build();
 
-        seedSampleData();
+        try {
+            seedSampleData();
+        } catch (Exception e) {
+            log.warn("Seed data failed ({}), service will start without seeded data.", e.getMessage());
+        }
     }
 
     private void applyChaos() throws InterruptedException {
@@ -172,27 +175,28 @@ public class PolicyController {
     }
 
     private void seedSampleData() {
-        if (!policyRepository.findAll(PageRequest.of(0, 1)).hasContent()) {
-            log.info("Seeding sample policy data...");
-            String[] customers = {"CUST001", "CUST002", "CUST003", "CUST004", "CUST005"};
-            String[] types = {"health", "auto", "property", "life"};
-            for (int i = 0; i < customers.length; i++) {
-                Policy p = new Policy();
-                p.setCustomerId(customers[i]);
-                p.setPolicyNumber("POL-2024-" + String.format("%04d", i + 1));
-                p.setPolicyType(types[i % types.length]);
-                p.setStatus("active");
-                p.setPremiumAmount(200 + (i * 50));
-                p.setStartDate("2024-01-01");
-                p.setEndDate("2025-12-31");
-                p.setCoverages(List.of(
-                    new Policy.Coverage("medical",   100000, 500,  2000),
-                    new Policy.Coverage("emergency",  50000, 250,   500),
-                    new Policy.Coverage("dental",      5000, 100,   300)
-                ));
-                policyRepository.save(p);
-            }
-            log.info("Seeded {} policies", customers.length);
+        // Use deterministic IDs so save() acts as a cursor-free upsert (replaceOne by _id).
+        // No existence check needed — repeated saves are idempotent.
+        log.info("Upserting sample policy data...");
+        String[] customers = {"CUST001", "CUST002", "CUST003", "CUST004", "CUST005"};
+        String[] types = {"health", "auto", "property", "life"};
+        for (int i = 0; i < customers.length; i++) {
+            Policy p = new Policy();
+            p.setId("pol-" + customers[i].toLowerCase());
+            p.setCustomerId(customers[i]);
+            p.setPolicyNumber("POL-2024-" + String.format("%04d", i + 1));
+            p.setPolicyType(types[i % types.length]);
+            p.setStatus("active");
+            p.setPremiumAmount(200 + (i * 50));
+            p.setStartDate("2024-01-01");
+            p.setEndDate("2025-12-31");
+            p.setCoverages(List.of(
+                new Policy.Coverage("medical",   100000, 500,  2000),
+                new Policy.Coverage("emergency",  50000, 250,   500),
+                new Policy.Coverage("dental",      5000, 100,   300)
+            ));
+            policyRepository.save(p);
         }
+        log.info("Upserted {} policies", customers.length);
     }
 }
