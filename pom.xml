@@ -36,11 +36,10 @@
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
     </dependency>
 
-    <!-- OpenTelemetry (starter already bundles opentelemetry-exporter-otlp at the correct version) -->
+    <!-- OpenTelemetry API only (no SDK autoconfigure) - Spring Boot BOM manages 1.31.0 -->
     <dependency>
-      <groupId>io.opentelemetry.instrumentation</groupId>
-      <artifactId>opentelemetry-spring-boot-starter</artifactId>
-      <version>2.6.0</version>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api</artifactId>
     </dependency>
 
     <!-- Logging -->

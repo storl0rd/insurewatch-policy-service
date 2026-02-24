@@ -12,31 +12,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
-  metrics:
-    export:
-      otlp:
-        enabled: true
-
-otel:
-  exporter:
-    otlp:
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
-      protocol: http/protobuf
-  service:
-    name: policy-service
-  resource:
-    attributes:
-      service.version: "1.0.0"
-      service.language: java
-      deployment.environment: ${ENVIRONMENT:production}
-  logs:
-    exporter: otlp
-  metrics:
-    exporter: otlp
-  traces:
-    exporter: otlp
-    sampler: always_on
+        include: health,info,metrics
 
 logging:
   level:
