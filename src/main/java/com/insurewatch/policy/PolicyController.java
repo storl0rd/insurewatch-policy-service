@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.PostConstruct;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +39,7 @@ public class PolicyController {
     ));
     private final List<byte[]> memoryHog = new ArrayList<>();
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         tracer = GlobalOpenTelemetry.getTracer("policy-service", "1.0.0");
         Meter meter = GlobalOpenTelemetry.getMeter("policy-service");
